@@ -338,6 +338,32 @@ private class TutupHandler extends WindowAdapter {
 }
 ```
 
+### 10.3 Alur Event saat Meminjam Perangkat
+
+Diagram berikut menunjukkan bagaimana beberapa handler bekerja berurutan dalam satu kali peminjaman, mulai dari kursor menyentuh kartu sampai transaksi tercatat. Setiap kotak menyebut handler dan method yang dipanggil.
+
+```mermaid
+flowchart TD
+    A["Kursor masuk ke kartu"] --> B["KartuHandler.mouseEntered<br/>bingkai oranye, petunjuk di bilah status"]
+    B --> C["Kartu diklik"]
+    C --> D["KartuHandler.mouseClicked<br/>perangkat dipilih di comboPerangkat,<br/>CardLayout membuka halaman FORM"]
+    D --> E["PilihanHandler.itemStateChanged<br/>label stok diperbarui"]
+    E --> F["Pengguna mengisi nama, NIM, jumlah<br/>(AngkaHandler.keyTyped menolak selain angka)"]
+    F --> G["Check box dicentang"]
+    G --> H["PilihanHandler.itemStateChanged<br/>tombol Catat diaktifkan"]
+    H --> I["Tombol Catat ditekan"]
+    I --> J["TombolHandler.actionPerformed<br/>memanggil catatPeminjaman()"]
+    J --> K{"Nama, NIM, atau<br/>jumlah kosong?"}
+    K -- ya --> L["Dialog WARNING"]
+    K -- tidak --> M{"Jumlah kurang dari 1 atau<br/>melebihi stok?"}
+    M -- ya --> N["Dialog ERROR"]
+    M -- tidak --> O["Peminjaman disimpan, stok berkurang"]
+    O --> P["perbaruiTampilan()<br/>kartu, buku, dan ringkasan dibuat ulang"]
+    P --> Q["Halaman BUKU dibuka"]
+```
+
+Langkah D ke E terjadi dengan sendirinya. `mouseClicked` hanya memanggil `comboPerangkat.setSelectedIndex(i)`, dan perubahan pilihan itu memicu `ItemListener` milik combo box. Jadi satu klik mouse menghasilkan event mouse sekaligus event item.
+
 ---
 
 ## 11. Cara Menjalankan Program
